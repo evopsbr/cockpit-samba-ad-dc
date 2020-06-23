@@ -1,36 +1,36 @@
 import React, { useState } from 'react';
-import cockpit from 'cockpit';
-import {
-    Form,
-    FormGroup,
-    TextInput,
-    Button,
-    Modal
-} from '@patternfly/react-core';
 import {
     Loading,
     SuccessToast,
     ErrorToast
 } from '../common';
-import './index.css';
+import {
+    Form,
+    FormGroup,
+    TextInput,
+    Modal,
+    Button
+} from '@patternfly/react-core';
+import cockpit from 'cockpit';
 
-export default function ShowContact() {
-    const [contactName, setContactName] = useState("");
+export default function SetSite() {
+    const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState(false);
     const [errorAlertVisible, setErrorAlertVisible] = useState(false);
     const [successAlertVisible, setSuccessAlertVisible] = useState(false);
     const [successMessage, setSuccessMessage] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [loading, setLoading] = useState();
+    const [subnet, setSubnet] = useState("");
+    const [siteOfSubnet, setSiteOfSubnet] = useState("");
 
-    const handleContactNameChange = (e) => {
-        setContactName(e);
-    };
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const handleSubnetInputChange = (value) => setSubnet(value);
+    const handleSiteOfSubnetChange = (value) => setSiteOfSubnet(value);
 
     const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true);
-        const command = `samba-tool contact show ${contactName}`;
+        const command = `samba-tool sites subnet set-site ${subnet} ${siteOfSubnet}`;
         const script = () => cockpit.script(command, { superuser: true, err: 'message' })
                 .done((data) => {
                     setSuccessMessage(data);
@@ -44,24 +44,25 @@ export default function ShowContact() {
                     setLoading(false);
                     setIsModalOpen(false);
                 });
-        return script();
+        script();
     };
     const handleModalToggle = () => setIsModalOpen(!isModalOpen);
+
     return (
         <>
             {errorAlertVisible && <ErrorToast errorMessage={errorMessage} closeModal={() => setErrorAlertVisible(false)} />}
             {successAlertVisible && <SuccessToast successMessage={successMessage} closeModal={() => setSuccessAlertVisible(false)} />}
             <Button variant="secondary" onClick={handleModalToggle}>
-                Show Contact
+                Set Site
             </Button>
             <Modal
-                title="Show A Contact"
+                title="Set Site"
                 isOpen={isModalOpen}
                 onClose={handleModalToggle}
-                description="A dialog for showing contacts"
+                description="A dialog for setting a site"
                 actions={[
                     <Button key="confirm" variant="primary" onClick={handleSubmit}>
-                        Show
+                        Set Site
                     </Button>,
                     <Button key="cancel" variant="link" onClick={handleModalToggle}>
                         Cancel
@@ -73,18 +74,33 @@ export default function ShowContact() {
             >
                 <Form isHorizontal>
                     <FormGroup
-                        label="Contact Name"
+                        label="Subnet"
                         isRequired
-                        fieldId="horizontal-form-contact-name"
+                        fieldId="horizontal-form-subnet"
                     >
                         <TextInput
-                            value={contactName}
+                            value={subnet}
                             type="text"
-                            id="horizontal-form-contact-name"
-                            aria-describedby="horizontal-form-contact-name-helper"
-                            name="horizontal-form-contact-name"
-                            onChange={handleContactNameChange}
-                            placeholder="James T. Kirk"
+                            id="horizontal-form-subnet"
+                            aria-describedby="horizontal-form-subnet-helper"
+                            name="horizontal-form-subnet"
+                            onChange={handleSubnetInputChange}
+                            placeholder="Subnet"
+                        />
+                    </FormGroup>
+                    <FormGroup
+                        label="Site of Subnet"
+                        isRequired
+                        fieldId="horizontal-form-site-of-subnet"
+                    >
+                        <TextInput
+                            value={siteOfSubnet}
+                            type="text"
+                            id="horizontal-form-site-of-subnet"
+                            aria-describedby="horizontal-form-site-of-subnet-helper"
+                            name="horizontal-form-site-of-subnet"
+                            onChange={handleSiteOfSubnetChange}
+                            placeholder="Site of Subnet"
                         />
                     </FormGroup>
                 </Form>

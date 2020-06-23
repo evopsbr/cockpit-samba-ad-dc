@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import cockpit from 'cockpit';
 import {
     Form,
     FormGroup,
@@ -7,65 +6,64 @@ import {
     Modal,
     Button
 } from '@patternfly/react-core';
+import cockpit from 'cockpit';
 import {
     Loading,
     SuccessToast,
     ErrorToast
 } from '../common';
-import './css/computer.css';
 
 export default function Show() {
-    const [computerName, setComputerName] = useState('');
+    const [userName, setUserName] = useState('');
+    const [orgUnitContainer, setOrgUnitContainer] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [successMessage, setSuccessMessage] = useState([]);
+    const [successMessage, setSuccessMessage] = useState();
     const [errorMessage, setErrorMessage] = useState();
     const [errorAlertVisible, setErrorAlertVisible] = useState();
     const [successAlertVisible, setSuccessAlertVisible] = useState();
 
-    const handleComputerNameChange = (e) => {
-        setComputerName(e);
-    };
     const handleModalToggle = () => setIsModalOpen(!isModalOpen);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    const handleUsernameInputChange = (value) => setUserName(value);
+
+    const handleOrgUnitContainerChange = (value) => setOrgUnitContainer(value);
+
+    const handleSubmit = () => {
         setLoading(true);
-        const command = `samba-tool computer show ${computerName}`;
+        const command = `samba-tool user move ${userName} ${orgUnitContainer}`;
         const script = () => cockpit.script(command, { superuser: true, err: 'message' })
                 .done((data) => {
-                    const splitData = data.split('\n');
-                    setSuccessMessage(splitData);
+                    console.log(data);
+                    setSuccessMessage(data);
                     setSuccessAlertVisible(true);
                     setLoading(false);
                     setIsModalOpen(false);
                 })
                 .catch((exception) => {
                     console.log(exception);
-                    if (exception != null) {
-                        setErrorMessage(exception.message);
-                        setErrorAlertVisible(true);
-                        setLoading(false);
-                        setIsModalOpen(false);
-                    }
+                    setErrorMessage(exception.message);
+                    setErrorAlertVisible(true);
+                    setLoading(false);
+                    setIsModalOpen(false);
                 });
-        return script();
+        script();
     };
     return (
         <>
             {errorAlertVisible && <ErrorToast errorMessage={errorMessage} closeModal={() => setErrorAlertVisible(false)} />}
             {successAlertVisible && <SuccessToast successMessage={successMessage} closeModal={() => setSuccessAlertVisible(false)} />}
             <Button variant="secondary" onClick={handleModalToggle}>
-                Show AD Object
+                Move User
             </Button>
             <Modal
-                title="Show A Computer's AD Object"
+                title="Delete A User"
                 isOpen={isModalOpen}
                 onClose={handleModalToggle}
-                description="A dialog for showing a Computer AD Object"
+                description="A dialog for moving a user to an organizational unit/container"
                 actions={[
                     <Button key="confirm" variant="primary" onClick={handleSubmit}>
-                        Show
+                        Move
                     </Button>,
                     <Button key="cancel" variant="link" onClick={handleModalToggle}>
                         Cancel
@@ -75,20 +73,35 @@ export default function Show() {
                 isFooterLeftAligned
                 appendTo={document.body}
             >
-                <Form isHorizontal>
+                <Form isHorizontal onSubmit={handleSubmit}>
                     <FormGroup
-                        label="Computer Name"
+                        label="Username"
+                        fieldId="horizontal-form-username"
                         isRequired
-                        fieldId="horizontal-form-computer-name"
                     >
                         <TextInput
-                            value={computerName}
+                            value={userName}
                             type="text"
-                            id="horizontal-form-computer-name"
-                            aria-describedby="horizontal-form-computer-name-helper"
-                            name="horizontal-form-computer-name"
-                            onChange={handleComputerNameChange}
-                            placeholder="dc1"
+                            id="horizontal-form-username"
+                            aria-describedby="horizontal-form-username-helper"
+                            name="horizontal-form-username"
+                            onChange={handleUsernameInputChange}
+                            placeholder="User1"
+                        />
+                    </FormGroup>
+                    <FormGroup
+                        label="Organization Unit/Container"
+                        fieldId="horizontal-form-orgUnitContainer"
+                        isRequired
+                    >
+                        <TextInput
+                            value={orgUnitContainer}
+                            type="text"
+                            id="horizontal-form-orgUnitContainer"
+                            aria-describedby="horizontal-form-orgUnitContainer-helper"
+                            name="horizontal-form-orgUnitContainer"
+                            onChange={handleOrgUnitContainerChange}
+                            placeholder="CN=Users"
                         />
                     </FormGroup>
                 </Form>

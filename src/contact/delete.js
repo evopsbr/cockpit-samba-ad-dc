@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import cockpit from 'cockpit';
+import {
+    Loading,
+    SuccessToast,
+    ErrorToast
+} from '../common';
 import {
     Form,
     FormGroup,
@@ -7,30 +11,25 @@ import {
     Button,
     Modal
 } from '@patternfly/react-core';
-import {
-    Loading,
-    SuccessToast,
-    ErrorToast
-} from '../common';
+import cockpit from 'cockpit';
 import './index.css';
 
-export default function ShowContact() {
+export default function DeleteContact() {
     const [contactName, setContactName] = useState("");
+    const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState(false);
     const [errorAlertVisible, setErrorAlertVisible] = useState(false);
     const [successAlertVisible, setSuccessAlertVisible] = useState(false);
     const [successMessage, setSuccessMessage] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [loading, setLoading] = useState();
 
     const handleContactNameChange = (e) => {
         setContactName(e);
     };
-
     const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true);
-        const command = `samba-tool contact show ${contactName}`;
+        const command = `samba-tool contact delete ${contactName}`;
         const script = () => cockpit.script(command, { superuser: true, err: 'message' })
                 .done((data) => {
                     setSuccessMessage(data);
@@ -42,26 +41,25 @@ export default function ShowContact() {
                     setErrorMessage(exception.message);
                     setErrorAlertVisible(true);
                     setLoading(false);
-                    setIsModalOpen(false);
                 });
-        return script();
+        script();
     };
     const handleModalToggle = () => setIsModalOpen(!isModalOpen);
     return (
         <>
             {errorAlertVisible && <ErrorToast errorMessage={errorMessage} closeModal={() => setErrorAlertVisible(false)} />}
             {successAlertVisible && <SuccessToast successMessage={successMessage} closeModal={() => setSuccessAlertVisible(false)} />}
-            <Button variant="secondary" onClick={handleModalToggle}>
-                Show Contact
+            <Button variant="danger" onClick={handleModalToggle}>
+                Delete Contact
             </Button>
             <Modal
-                title="Show A Contact"
+                title="Delete A Contact"
                 isOpen={isModalOpen}
                 onClose={handleModalToggle}
-                description="A dialog for showing contacts"
+                description="A dialog for deleting contacts"
                 actions={[
-                    <Button key="confirm" variant="primary" onClick={handleSubmit}>
-                        Show
+                    <Button key="confirm" variant="danger" onClick={handleSubmit}>
+                        Delete
                     </Button>,
                     <Button key="cancel" variant="link" onClick={handleModalToggle}>
                         Cancel
@@ -84,7 +82,7 @@ export default function ShowContact() {
                             aria-describedby="horizontal-form-contact-name-helper"
                             name="horizontal-form-contact-name"
                             onChange={handleContactNameChange}
-                            placeholder="James T. Kirk"
+                            placeholder="Contact1"
                         />
                     </FormGroup>
                 </Form>

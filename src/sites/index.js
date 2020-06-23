@@ -1,14 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import List from './list';
-import Show from './show';
 import Create from './create';
-import Delete from './delete';
-import './css/computer.css';
-import { Toolbar, ToolbarItem, ToolbarGroup, ToolbarContent } from '@patternfly/react-core';
+import Remove from './remove';
+import CreateSubnet from './create_subnet';
+import RemoveSubnet from './remove_subnet';
+import SetSite from './set-site';
+import './index.css';
 import { BackButton } from '../common';
+import { Toolbar, ToolbarItem, ToolbarGroup, ToolbarContent } from '@patternfly/react-core';
 
-export default function Computer() {
+export default function Sites() {
     return (
         <div>
             <BackButton />
@@ -19,19 +20,24 @@ export default function Computer() {
                             <Create />
                         </ToolbarItem>
                         <ToolbarItem>
-                            <Delete />
+                            <Remove />
                         </ToolbarItem>
                         <ToolbarItem>
-                            <Show />
+                            <CreateSubnet />
+                        </ToolbarItem>
+                        <ToolbarItem>
+                            <RemoveSubnet />
+                        </ToolbarItem>
+                        <ToolbarItem>
+                            <SetSite />
                         </ToolbarItem>
                     </ToolbarGroup>
                 </ToolbarContent>
             </Toolbar>
-            <List />
         </div>
     );
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    ReactDOM.render(<Computer />, document.getElementById("computer"));
+    ReactDOM.render(<Sites />, document.getElementById("sites"));
 });

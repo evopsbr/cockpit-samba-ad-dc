@@ -1,36 +1,34 @@
 import React, { useState } from 'react';
-import cockpit from 'cockpit';
-import {
-    Form,
-    FormGroup,
-    TextInput,
-    Button,
-    Modal
-} from '@patternfly/react-core';
 import {
     Loading,
     SuccessToast,
     ErrorToast
 } from '../common';
-import './index.css';
+import {
+    Form,
+    FormGroup,
+    TextInput,
+    Modal,
+    Button
+} from '@patternfly/react-core';
+import cockpit from 'cockpit';
 
-export default function ShowContact() {
-    const [contactName, setContactName] = useState("");
+export default function MoveOrgUnit() {
+    const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState(false);
     const [errorAlertVisible, setErrorAlertVisible] = useState(false);
     const [successAlertVisible, setSuccessAlertVisible] = useState(false);
     const [successMessage, setSuccessMessage] = useState(false);
+    const [oldOudn, setOldOudn] = useState("");
+    const [newOudn, setNewOudn] = useState("");
+
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [loading, setLoading] = useState();
+    const handleOudnInputChange = (value) => setOldOudn(value);
+    const handelNewOudnInputChange = (value) => setNewOudn(value);
 
-    const handleContactNameChange = (e) => {
-        setContactName(e);
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    const handleSubmit = () => {
         setLoading(true);
-        const command = `samba-tool contact show ${contactName}`;
+        const command = `samba-tool ou move ${oldOudn} ${newOudn}`;
         const script = () => cockpit.script(command, { superuser: true, err: 'message' })
                 .done((data) => {
                     setSuccessMessage(data);
@@ -44,24 +42,25 @@ export default function ShowContact() {
                     setLoading(false);
                     setIsModalOpen(false);
                 });
-        return script();
+        script();
     };
     const handleModalToggle = () => setIsModalOpen(!isModalOpen);
+
     return (
         <>
             {errorAlertVisible && <ErrorToast errorMessage={errorMessage} closeModal={() => setErrorAlertVisible(false)} />}
             {successAlertVisible && <SuccessToast successMessage={successMessage} closeModal={() => setSuccessAlertVisible(false)} />}
             <Button variant="secondary" onClick={handleModalToggle}>
-                Show Contact
+                Move OU
             </Button>
             <Modal
-                title="Show A Contact"
+                title="Move Organization Unit"
                 isOpen={isModalOpen}
                 onClose={handleModalToggle}
-                description="A dialog for showing contacts"
+                description="A dialog for moving an organization unit"
                 actions={[
                     <Button key="confirm" variant="primary" onClick={handleSubmit}>
-                        Show
+                        Move
                     </Button>,
                     <Button key="cancel" variant="link" onClick={handleModalToggle}>
                         Cancel
@@ -73,18 +72,32 @@ export default function ShowContact() {
             >
                 <Form isHorizontal>
                     <FormGroup
-                        label="Contact Name"
+                        label="Old Organization Unit"
                         isRequired
-                        fieldId="horizontal-form-contact-name"
+                        fieldId="horizontal-form-orgunit"
                     >
                         <TextInput
-                            value={contactName}
+                            value={oldOudn}
                             type="text"
-                            id="horizontal-form-contact-name"
-                            aria-describedby="horizontal-form-contact-name-helper"
-                            name="horizontal-form-contact-name"
-                            onChange={handleContactNameChange}
-                            placeholder="James T. Kirk"
+                            id="horizontal-form-orgunit"
+                            aria-describedby="horizontal-form-orgunit-helper"
+                            name="horizontal-form-orgunit"
+                            onChange={handleOudnInputChange}
+                            placeholder="'OU=OrgUnit'"
+                        />
+                    </FormGroup>
+                    <FormGroup
+                        label="New Organiaztion Unit"
+                        fieldId="horizontal-form-new-oudn"
+                    >
+                        <TextInput
+                            value={newOudn}
+                            type="text"
+                            id="horizontal-form-new-oudn"
+                            aria-describedby="horizontal-form-new-oudn-helper"
+                            name="horizontal-form-new-oudn"
+                            onChange={handelNewOudnInputChange}
+                            placeholder="'OU=NewParentOfOrgUnit,DC=samdom,DC=example,DC=com'"
                         />
                     </FormGroup>
                 </Form>

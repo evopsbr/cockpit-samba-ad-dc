@@ -1,67 +1,66 @@
 import React, { useState } from 'react';
-import cockpit from 'cockpit';
-import {
-    Form,
-    FormGroup,
-    TextInput,
-    Button,
-    Modal
-} from '@patternfly/react-core';
 import {
     Loading,
     SuccessToast,
     ErrorToast
 } from '../common';
-import './index.css';
+import {
+    Form,
+    FormGroup,
+    TextInput,
+    Modal,
+    Button
+} from '@patternfly/react-core';
+import cockpit from 'cockpit';
 
-export default function ShowContact() {
-    const [contactName, setContactName] = useState("");
+export default function DeleteOU() {
+    const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState(false);
     const [errorAlertVisible, setErrorAlertVisible] = useState(false);
     const [successAlertVisible, setSuccessAlertVisible] = useState(false);
     const [successMessage, setSuccessMessage] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [loading, setLoading] = useState();
+    const [oudn, setOudn] = useState("");
 
-    const handleContactNameChange = (e) => {
-        setContactName(e);
-    };
+    const [isModalOpen, setIsModalOpen] = useState();
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    const handleModalToggle = () => setIsModalOpen(!isModalOpen);
+    const handleOudnInputChange = (value) => setOudn(value);
+
+    const handleSubmit = () => {
         setLoading(true);
-        const command = `samba-tool contact show ${contactName}`;
+        const command = `samba-tool ou delete ${oudn}`;
         const script = () => cockpit.script(command, { superuser: true, err: 'message' })
                 .done((data) => {
+                    console.log(data);
                     setSuccessMessage(data);
                     setSuccessAlertVisible(true);
                     setLoading(false);
                     setIsModalOpen(false);
                 })
                 .catch((exception) => {
+                    console.log(exception);
                     setErrorMessage(exception.message);
                     setErrorAlertVisible(true);
                     setLoading(false);
                     setIsModalOpen(false);
                 });
-        return script();
+        script();
     };
-    const handleModalToggle = () => setIsModalOpen(!isModalOpen);
     return (
         <>
             {errorAlertVisible && <ErrorToast errorMessage={errorMessage} closeModal={() => setErrorAlertVisible(false)} />}
             {successAlertVisible && <SuccessToast successMessage={successMessage} closeModal={() => setSuccessAlertVisible(false)} />}
-            <Button variant="secondary" onClick={handleModalToggle}>
-                Show Contact
+            <Button variant="danger" onClick={handleModalToggle}>
+                Delete OU
             </Button>
             <Modal
-                title="Show A Contact"
+                title="Delete an Organization Unit"
                 isOpen={isModalOpen}
                 onClose={handleModalToggle}
-                description="A dialog for showing contacts"
+                description="A dialog for deleting organizational units"
                 actions={[
-                    <Button key="confirm" variant="primary" onClick={handleSubmit}>
-                        Show
+                    <Button key="confirm" variant="danger" onClick={handleSubmit}>
+                        Delete
                     </Button>,
                     <Button key="cancel" variant="link" onClick={handleModalToggle}>
                         Cancel
@@ -73,18 +72,18 @@ export default function ShowContact() {
             >
                 <Form isHorizontal>
                     <FormGroup
-                        label="Contact Name"
+                        label="Organization Unit"
                         isRequired
-                        fieldId="horizontal-form-contact-name"
+                        fieldId="horizontal-form-orgunit"
                     >
                         <TextInput
-                            value={contactName}
+                            value={oudn}
                             type="text"
-                            id="horizontal-form-contact-name"
-                            aria-describedby="horizontal-form-contact-name-helper"
-                            name="horizontal-form-contact-name"
-                            onChange={handleContactNameChange}
-                            placeholder="James T. Kirk"
+                            id="horizontal-form-orgunit"
+                            aria-describedby="horizontal-form-orgunit-helper"
+                            name="horizontal-form-orgunit"
+                            onChange={handleOudnInputChange}
+                            placeholder="'OU=OrgUnit'"
                         />
                     </FormGroup>
                 </Form>

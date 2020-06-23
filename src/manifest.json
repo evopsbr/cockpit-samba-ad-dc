@@ -4,7 +4,7 @@
         "cockpit": "137"
     },
     "name": "samba-ad-dc",
-    "content-security-policy": "default-src: self; connect-src: self; style-src 'self' 'unsafe-inline';",
+    "content-security-policy": "default-src: self; connect-src: self; style-src 'self' 'unsafe-inline' '';",
 
     "tools": {
         "index": {

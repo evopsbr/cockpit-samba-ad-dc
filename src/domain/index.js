@@ -1,15 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Info from './info';
+import './index.css';
+import { BackButton } from '../common';
 
-export default function TestComputer() {
+export default function Domain() {
     return (
         <>
+            <BackButton />
             <Info />
         </>
     );
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    ReactDOM.render(<TestComputer />, document.getElementById("domain"));
+    ReactDOM.render(<Domain />, document.getElementById("domain"));
 });

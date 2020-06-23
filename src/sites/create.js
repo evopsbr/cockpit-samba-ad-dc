@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import cockpit from 'cockpit';
+import {
+    Loading,
+    SuccessToast,
+    ErrorToast
+} from '../common';
 import {
     Form,
     FormGroup,
@@ -7,61 +11,54 @@ import {
     Button,
     Modal
 } from '@patternfly/react-core';
-import {
-    Loading,
-    SuccessToast,
-    ErrorToast
-} from '../common';
+import cockpit from 'cockpit';
 import './index.css';
 
-export default function ShowContact() {
-    const [contactName, setContactName] = useState("");
+export default function CreateSite() {
+    const [siteName, setSiteName] = useState("");
+    const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState(false);
     const [errorAlertVisible, setErrorAlertVisible] = useState(false);
     const [successAlertVisible, setSuccessAlertVisible] = useState(false);
     const [successMessage, setSuccessMessage] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [loading, setLoading] = useState();
 
-    const handleContactNameChange = (e) => {
-        setContactName(e);
+    const handleSiteNameChange = (e) => {
+        setSiteName(e);
     };
-
     const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true);
-        const command = `samba-tool contact show ${contactName}`;
+        const command = `samba-tool site create ${siteName}`;
         const script = () => cockpit.script(command, { superuser: true, err: 'message' })
                 .done((data) => {
                     setSuccessMessage(data);
                     setSuccessAlertVisible(true);
                     setLoading(false);
-                    setIsModalOpen(false);
                 })
                 .catch((exception) => {
                     setErrorMessage(exception.message);
                     setErrorAlertVisible(true);
                     setLoading(false);
-                    setIsModalOpen(false);
                 });
-        return script();
+        script();
     };
     const handleModalToggle = () => setIsModalOpen(!isModalOpen);
     return (
         <>
             {errorAlertVisible && <ErrorToast errorMessage={errorMessage} closeModal={() => setErrorAlertVisible(false)} />}
             {successAlertVisible && <SuccessToast successMessage={successMessage} closeModal={() => setSuccessAlertVisible(false)} />}
-            <Button variant="secondary" onClick={handleModalToggle}>
-                Show Contact
+            <Button variant="primary" onClick={handleModalToggle}>
+                Create Site
             </Button>
             <Modal
-                title="Show A Contact"
+                title="Create A New Site"
                 isOpen={isModalOpen}
                 onClose={handleModalToggle}
-                description="A dialog for showing contacts"
+                description="A dialog for creating a new site"
                 actions={[
                     <Button key="confirm" variant="primary" onClick={handleSubmit}>
-                        Show
+                        Create
                     </Button>,
                     <Button key="cancel" variant="link" onClick={handleModalToggle}>
                         Cancel
@@ -73,18 +70,18 @@ export default function ShowContact() {
             >
                 <Form isHorizontal>
                     <FormGroup
-                        label="Contact Name"
+                        label="Site Name"
                         isRequired
-                        fieldId="horizontal-form-contact-name"
+                        fieldId="horizontal-form-site-name"
                     >
                         <TextInput
-                            value={contactName}
+                            value={siteName}
                             type="text"
-                            id="horizontal-form-contact-name"
-                            aria-describedby="horizontal-form-contact-name-helper"
-                            name="horizontal-form-contact-name"
-                            onChange={handleContactNameChange}
-                            placeholder="James T. Kirk"
+                            id="horizontal-form-site-name"
+                            aria-describedby="horizontal-form-site-name-helper"
+                            name="horizontal-form-site-name"
+                            onChange={handleSiteNameChange}
+                            placeholder="Site1"
                         />
                     </FormGroup>
                 </Form>

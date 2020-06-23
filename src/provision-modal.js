@@ -9,6 +9,11 @@ import {
     Button
 } from '@patternfly/react-core';
 import cockpit from 'cockpit';
+import {
+    RenderError,
+    Loading,
+    Success
+} from './common';
 
 function ProvisionModal() {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,14 +39,26 @@ function ProvisionModal() {
     const [domain, setDomain] = useState('');
     const [serverRole, setServerRole] = useState(serverRoleOptions[0].value);
     const [dnsBackend, setDnsBackend] = useState(dnsBackendOptions[0].value);
-    const [dnsforwarder, setDnsForwarder] = useState();
-    const [password1, setPassword1] = useState();
-    const [password2, setPassword2] = useState();
+    const [dnsforwarder, setDnsForwarder] = useState('');
+    const [password1, setPassword1] = useState('');
+    const [password2, setPassword2] = useState('');
     const [loading, setLoading] = useState(false);
     const [isValidated, setIsValidated] = useState('error');
     const [helperText, setHelperText] = useState("Enter a Password");
     const [isValidPassword, setIsValidPassword] = useState(false);
     const [helperTextInvalid, setHelperTextInvalid] = useState();
+    const [errorMesssage, setErrorMessage] = useState();
+    const [errorAlertVisible, setErrorAlertVisible] = useState();
+    const [successMessage, setSuccessMessage] = useState();
+    const [successAlertVisible, setSuccessAlertVisible] = useState();
+
+    const hideErrorAlert = () => {
+        setErrorAlertVisible(false);
+    };
+
+    const hideSuccessAlert = () => {
+        setSuccessAlertVisible(false);
+    };
 
     const passwordChecker = (pass1, pass2) => {
         // TODO: Regex for checking password strength instead of if/else clause
@@ -83,7 +100,9 @@ function ProvisionModal() {
         setPassword2(password);
         passwordChecker(password1, password);
     };
-    const script = `
+    const handleSubmit = () => {
+        setLoading(true);
+        const command = `
         samba-tool domain provision \
                 --use-rfc2307 \
                 --realm ${realm} \
@@ -96,19 +115,31 @@ function ProvisionModal() {
         samba
         samba-tool domain info 127.0.0.1
     `;
-    const handleSubmit = () => {
-        setLoading(true);
-        console.log('Submitting...');
-        cockpit.script(script, { superuser: true, err: "message" });
-        setLoading(false);
-        setIsModalOpen(false);
-        console.log('Submitted!');
+        const script = () => cockpit.script(command, { superuser: true, err: "message" })
+                .done((data) => {
+                    console.log(data);
+                    setSuccessMessage(data);
+                    setErrorAlertVisible(true);
+                    setLoading(false);
+                    setIsModalOpen(false);
+                })
+                .catch((exception) => {
+                    console.log(exception);
+                    setErrorMessage(exception.message);
+                    setErrorAlertVisible(true);
+                    setLoading(false);
+                    setIsModalOpen(false);
+                });
+
+        script();
     };
     return (
         <>
             <Button variant="primary" onClick={handleModalToggle}>
                 Provision Domain
             </Button>
+            <RenderError error={errorMesssage} hideAlert={hideErrorAlert} isAlertVisible={errorAlertVisible} />
+            <Success message={successMessage} hideAlert={hideSuccessAlert} isAlertVisible={successAlertVisible} />
             <Modal
                 title="Samba AD DC Setup"
                 isOpen={isModalOpen}
@@ -116,8 +147,9 @@ function ProvisionModal() {
                 description="A dialog for provisioning a Samba AD DC Domain"
                 actions={[
                     <Button key="confirm" variant="primary" onClick={handleSubmit}>
-                        {loading ? "Submitting" : "Confirm"}
+                        Provision
                     </Button>,
+                    <Loading key="loading" loading={loading} />,
                     <Button key="cancel" variant="link" onClick={handleModalToggle}>
                         Cancel
                     </Button>

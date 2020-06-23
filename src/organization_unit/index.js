@@ -1,16 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import List from './list';
-import Show from './show';
+import ListObjects from './listobjects';
 import Create from './create';
 import Delete from './delete';
-import './css/computer.css';
+import Move from './move';
+import Rename from './rename';
 import { Toolbar, ToolbarItem, ToolbarGroup, ToolbarContent } from '@patternfly/react-core';
 import { BackButton } from '../common';
 
-export default function Computer() {
+export default function OrgUnit() {
     return (
-        <div>
+        <>
             <BackButton />
             <Toolbar>
                 <ToolbarContent>
@@ -22,16 +23,24 @@ export default function Computer() {
                             <Delete />
                         </ToolbarItem>
                         <ToolbarItem>
-                            <Show />
+                            <ListObjects />
+                        </ToolbarItem>
+                    </ToolbarGroup>
+                    <ToolbarGroup>
+                        <ToolbarItem>
+                            <Move />
+                        </ToolbarItem>
+                        <ToolbarItem>
+                            <Rename />
                         </ToolbarItem>
                     </ToolbarGroup>
                 </ToolbarContent>
             </Toolbar>
             <List />
-        </div>
+        </>
     );
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    ReactDOM.render(<Computer />, document.getElementById("computer"));
+    ReactDOM.render(<OrgUnit />, document.getElementById("org-unit"));
 });

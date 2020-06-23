@@ -1,0 +1,28 @@
+.heading-1{
+    color: green;
+    text-align: center;
+}
+
+.components {
+    margin: 30px;
+}
+
+.show-computer-heading {
+    color: deeppink;
+    text-align: center;
+}
+
+.list-computer-heading {
+    color: deepskyblue;
+    text-align: center;
+}
+
+.create-computer-heading {
+    color: teal;
+    text-align: center;
+}
+
+.delete-computer-heading {
+    color: red;
+    text-align: center;
+}

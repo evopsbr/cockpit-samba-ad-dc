@@ -27,7 +27,7 @@ var info = {
         ],
 
         "computer/index": [
-            "./computer/index.js"
+            "./computer/index.js",
         ],
 
         "domain/index": [
@@ -36,14 +36,34 @@ var info = {
 
         "contact/index": [
             "./contact/index.js"
+        ],
+
+        "time/index": [
+            "./time/index.js"
+        ],
+
+        "sites/index": [
+            "./sites/index.js"
+        ],
+
+        "user/index": [
+            "./user/index.js"
+        ],
+
+        "organization_unit/index": [
+            "./organization_unit/index.js"
         ]
     },
     files: [
         "css",
         "index.html",
-        "computer/index.html",
-        "domain/index.html",
-        "contact/index.html",
+        "computer/computer.html",
+        "domain/domain.html",
+        "contact/contact.html",
+        "time/time.html",
+        "sites/sites.html",
+        "user/user.html",
+        "organization_unit/orgunit.html",
         "manifest.json",
     ],
 };
@@ -90,7 +110,7 @@ Object.keys(info.entries).forEach(function(key) {
 var files = [];
 info.files.forEach(function(value) {
     if (!section || value.indexOf(section) === 0)
-        files.push({ from: vpath("src", value), to: value });
+        files.push({ from: vpath(value), to: value });
 });
 info.files = files;
 
@@ -157,6 +177,9 @@ module.exports = {
                     {
                         loader: 'css-loader',
                         options: { url: false }
+                    },
+                    {
+                        loader: 'resolve-url-loader'
                     },
                     {
                         loader: 'sass-loader',
