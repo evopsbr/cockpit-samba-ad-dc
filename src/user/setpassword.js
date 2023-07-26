@@ -36,7 +36,7 @@ export default function SetPassword() {
     const handleSubmit = () => {
         setLoading(true);
         if (mustChangeNextLogin) {
-            const cmd = `samba-tool user ${userName} ${password} --must-change-next-login`;
+            const cmd = `samba-tool user setpassword ${userName} --newpassword ${password} --must-change-at-next-login`; 
             const script = () => cockpit.script(cmd, { superuser: true, err: 'message' })
                     .done((data) => {
                         console.log(data);
@@ -54,7 +54,7 @@ export default function SetPassword() {
                     });
             script();
         } else {
-            const cmd = `samba-tool user ${userName} ${password}`;
+            const cmd = `samba-tool user setpassword ${userName} --newpassword ${password}`;
             const script = () => cockpit.script(cmd, { superuser: true, err: 'message' })
                     .done((data) => {
                         setSuccessMessage(data);
